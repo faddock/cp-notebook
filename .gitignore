@@ -1,0 +1,29 @@
+# Compiled binary files
+a.out
+*.o
+
+# Input/output test files
+*.in
+a.in
+a.out.txt
+
+# Build artifacts from Makefile
+*.exe
+*.obj
+*.gch
+*.so
+*.dll
+
+# Debugging files
+*.dSYM/
+*.swp
+*.swo
+vgcore.*
+
+# Editor/IDE-specific files
+.vscode/
+.idea/
+*.code-workspace
+
+# MacOS/Linux system files
+.DS_Store
