@@ -32,65 +32,39 @@ sample output
 1
 
 solve in c++ using segment trees*/
-
 #include <bits/stdc++.h>
 using namespace std;
-struct Node {
-    vector<long long> v;
-    vector<long long> ps;
-};
+typedef long long ll;
 
-vector<long long> arr;
-vector<Node> seg(4*100005);
-void build(int idx, int l, int r){
-    if(l==r){
-        seg[idx].v = {arr[l-1]};
-        seg[idx].ps = {arr[l-1]};
-        return;
-    }
-    int mid = (l+r)/2;
-    build(idx*2,l,mid);
-    build(idx*2+1,mid+1,r);
-    vector<long long> tmp(seg[idx*2].v.size()+seg[idx*2+1].v.size());
-    merge(seg[idx*2].v.begin(), seg[idx*2].v.end(), seg[idx*2+1].v.begin(), seg[idx*2+1].v.end(), tmp.begin());
-    seg[idx].v = tmp;
-    seg[idx].ps.resize(tmp.size());
-    seg[idx].ps[0] = tmp[0];
-    for (size_t i=1;i<tmp.size();i++) seg[idx].ps[i] = seg[idx].ps[i-1] + tmp[i];
-}
-Node query(int idx, int l, int r, int ql, int qr){
-    if(ql>r || qr<l) return Node();
-    if(ql<=l && r<=qr) return seg[idx];
-    int mid = (l+r)/2;
-    Node left = query(idx*2,l,mid,ql,qr), right = query(idx*2+1,mid+1,r,ql,qr);
-    if(left.v.empty()) return right;
-    if(right.v.empty()) return left;
-    Node res;
-    res.v.resize(left.v.size()+right.v.size());
-    merge(left.v.begin(), left.v.end(), right.v.begin(), right.v.end(), res.v.begin());
-    res.ps.resize(res.v.size());
-    res.ps[0] = res.v[0];
-    for(size_t i=1;i<res.v.size();i++) res.ps[i] = res.ps[i-1] + res.v[i];
-    return res;
-}
-int main(){
+int main() {
     ios::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n, q; cin >> n >> q;
-    arr.resize(n);
-    for (int i=0;i<n;i++) cin >> arr[i];
-    build(1,1,n);
-    for (int i=0;i<q;i++){
-        int l,r;
+    cin.tie(nullptr);
+    
+    int n, q;
+    cin >> n >> q;
+    
+    vector<ll> arr(n);
+    for (int i = 0; i < n; i++)
+        cin >> arr[i];
+    
+    for (int i = 0; i < q; i++) {
+        int l, r;
         cin >> l >> r;
-        Node res = query(1,1,n,l,r);
-        long long cur = 1;
-        for(auto v: res.v){
-            if(v>cur) break;
-            cur += v;
+        l--; // Convert to 0-indexed
+        
+        // Get values in the range
+        vector<ll> range_values(arr.begin() + l, arr.begin() + r);
+        sort(range_values.begin(), range_values.end());
+        
+        ll current_sum = 0;
+        for (ll val : range_values) {
+            if (val > current_sum + 1)
+                break;
+            current_sum += val;
         }
-        cout << cur << "\n";
+        
+        cout << current_sum + 1 << "\n";
     }
+    
     return 0;
 }

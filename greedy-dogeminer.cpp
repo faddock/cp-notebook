@@ -1,79 +1,82 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    long long n, k;
+    int n;
+    long long k;
     cin >> n >> k;
     
-    vector<long long> c(n), p(n);
-    
-    for (int i = 0; i < n; ++i) {
-        cin >> c[i];
+    vector<long long> cost(n), multiplier(n);
+    for (int i = 0; i < n; i++) {
+        cin >> cost[i];
+    }
+    for (int i = 0; i < n; i++) {
+        cin >> multiplier[i];
     }
     
-    for (int i = 0; i < n; ++i) {
-        cin >> p[i];
-    }
+    double total_time = 0.0;
+    double current_coins = 0.0;
+    double current_rate = 1.0; // Coins per second
     
-    vector<bool> used(n, false); // Track which upgrades have been used
-    vector<int> upgradeSequence; // Store the sequence of upgrades (1-indexed)
+    vector<bool> bought(n, false);
+    vector<int> upgrade_order; // Track which upgrades were bought
     
-    double rate = 1.0; // Initial production rate: 1 coin per second
-    double time = 0.0; // Total time elapsed
-    double coins = 0.0; // Current number of coins
-    
-    while (coins < k) {
-        double timeToFinish = (k - coins) / rate;
+    while (current_coins < k) {
+        // Calculate time to reach k coins with current rate
+        double time_without_upgrade = (k - current_coins) / current_rate;
+        double best_time = time_without_upgrade;
+        int best_upgrade = -1;
         
-        double bestTime = timeToFinish;
-        int bestUpgrade = -1;
-        
-        for (int i = 0; i < n; ++i) {
-            if (used[i]) continue;
-            
-            double timeToEarn = max(0.0, (c[i] - coins) / rate);
-            double coinsAfter = coins + timeToEarn * rate - c[i];
-            double newRate = rate * p[i];
-            double timeRemaining = (k - coinsAfter) / newRate;
-            double totalTime = timeToEarn + timeRemaining;
-            
-            if (totalTime < bestTime) {
-                bestTime = totalTime;
-                bestUpgrade = i;
+        for (int i = 0; i < n; i++) {
+            if (!bought[i]) {
+                // Time to collect coins for this upgrade
+                double time_to_collect = max(0.0, (cost[i] - current_coins) / current_rate);
+                
+                // New rate after buying this upgrade
+                double new_rate = current_rate * multiplier[i];
+                
+                // New coins after collecting and buying the upgrade
+                double new_coins = current_coins + time_to_collect * current_rate - cost[i];
+                
+                // Time to collect remaining coins with new rate
+                double time_remaining = (k - new_coins) / new_rate;
+                
+                // Total additional time with this upgrade
+                double total_additional_time = time_to_collect + time_remaining;
+                
+                if (total_additional_time < best_time) {
+                    best_time = total_additional_time;
+                    best_upgrade = i;
+                }
             }
         }
-
-        if (bestUpgrade == -1) {
-            time += timeToFinish;
-            coins = k;
+        
+        if (best_upgrade == -1) {
+            // No more beneficial upgrades
+            total_time += time_without_upgrade;
+            current_coins = k; // We've reached the goal
         } else {
-            double timeToEarn = max(0.0, (c[bestUpgrade] - coins) / rate);
-            time += timeToEarn;
-            coins += timeToEarn * rate - c[bestUpgrade];
-            rate *= p[bestUpgrade];
-            used[bestUpgrade] = true;
-            upgradeSequence.push_back(bestUpgrade + 1);
+            // Buy the best upgrade
+            double time_to_collect = max(0.0, (cost[best_upgrade] - current_coins) / current_rate);
+            total_time += time_to_collect;
+            current_coins += time_to_collect * current_rate - cost[best_upgrade];
+            current_rate *= multiplier[best_upgrade];
+            bought[best_upgrade] = true;
+            upgrade_order.push_back(best_upgrade + 1); // +1 because upgrades are 1-indexed
         }
     }
     
-    cout << fixed << setprecision(6) << time << endl;    
-    if (!upgradeSequence.empty()) {
-        for (size_t i = 0; i < upgradeSequence.size(); ++i) {
-            cout << upgradeSequence[i];
-            if (i < upgradeSequence.size() - 1) {
-                cout << " ";
-            }
-        }
-        cout << endl;
-    } else {
-        cout << endl; 
-    }
+    // Print the minimum time with required precision
+    cout << fixed << setprecision(6) << total_time << endl;
+    
+
+    
     return 0;
 }
-
 /*
 
 Doge Miner
@@ -108,7 +111,6 @@ Sample Outputs
 Note
 For the sample, you should buy upgrade 3 then upgrade 1.
 
-
-solve in c++
+solve in c++ for competitive programming
 
 */
