@@ -1,49 +1,74 @@
-#include <iostream>
-#define ll long long
-#define MAXN 100005
+#include <bits/stdc++.h>
 using namespace std;
 
-ll N, K, A[MAXN], Pl[MAXN], Pr[MAXN], Ql[MAXN], Qr[MAXN], DP[MAXN][MAXN];
 int main() {
-    cin >> N >> K;
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
 
-    for (int i = 1; i <= N; ++i) cin >> A[i];
-    for (int i = 1; i <= K; ++i) cin >> Pl[i];
-    for (int i = 1; i <= K; ++i) cin >> Pr[i];
+    int n, k; cin >> n >> k;
+    
+    vector<int> a(n);
+    for (auto &x : a) 
+        cin >> x;
 
-    for (int i = 1; i <= K; ++i) {
-        // Find the index of Pl[i] in array A
-        for (int j = 1; j <= N; ++j) {
-            if (A[j] == Pl[i]) {
-                Ql[i] = j;
-                break;
-            }
-        }
+    vector<int> w = a;
+    sort(w.begin(), w.end());
+    w.erase(unique(w.begin(), w.end()), w.end());
+    int wSize = w.size();
+    
+    unordered_map<int, int> mapping;
+    for (int i = 0; i < wSize; i++) {
+        mapping[w[i]] = i;
     }
     
-    for (int i = 1; i <= K; ++i) {
-        // Find the index of Pr[i] in array A
-        for (int j = 1; j <= N; ++j) {
-            if (A[j] == Pr[i]) {
-                Qr[i] = j;
-                break;
-            }
-        }
+    vector<int> firstOccurrence(wSize, -1), lastOccurrence(wSize, -1);
+    for (int i = 0; i < n; i++){
+        int idx = mapping[a[i]];
+        if (firstOccurrence[idx] == -1)
+            firstOccurrence[idx] = i + 1;
+        lastOccurrence[idx] = i + 1;
     }
+    
+    vector<int> pl(k), pr(k);
+    for (int i = 0; i < k; i++) 
+        cin >> pl[i];
+    for (int i = 0; i < k; i++) 
+        cin >> pr[i];
 
-    for (int i = 1; i <= N; ++i) {
-        for (int j = 1; j <= N; ++j) {
-            if (Ql[i-1] == Qr[j-1]) {
-                DP[i][j] = DP[i-1][j-1] + 1;
-            } else {
-                DP[i][j] = max(DP[i-1][j], DP[i][j-1]);
-            }
-        }
+    vector<int> Ql(k), Qr(k);
+    for (int i = 0; i < k; i++){
+        int idx = pl[i] - 1; 
+        Ql[i] = firstOccurrence[idx];
     }
-
-    cout << DP[N][N] << endl;
-
-
+    for (int i = 0; i < k; i++){
+        int idx = pr[i] - 1;
+        Qr[i] = lastOccurrence[idx];
+    }
+    
+    vector<int> pos(n + 2, -1);
+    for (int i = 0; i < k; i++){
+        if(Qr[i] <= n)
+            pos[Qr[i]] = i;
+    }
+    
+    vector<int> seq;
+    for (int i = 0; i < k; i++){
+        if (Ql[i] <= n && pos[Ql[i]] != -1)
+            seq.push_back(pos[Ql[i]]);
+    }
+    
+    vector<int> lis;
+    for (int x : seq) {
+        auto it = lower_bound(lis.begin(), lis.end(), x);
+        if (it == lis.end())
+            lis.push_back(x);
+        else
+            *it = x;
+    }
+    
+    cout << lis.size() << endl;
+    return 0;
+}
 
 
 
@@ -73,5 +98,4 @@ int main() {
 
     target = 
     */
-    return 0;
-}
+
