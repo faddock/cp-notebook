@@ -1,59 +1,56 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include <bits/stdc++.h>
 using namespace std;
+using ll = long long;
 
-vector<int> compute_dp(const vector<pair<int, int>>& items, int max_cost) {
-    vector<int> dp(max_cost + 1, 0);
-    for (const auto& item : items) {
-        int cost = item.first;
-        int value = item.second;
-        for (int i = max_cost; i >= cost; --i) {
-            if (dp[i - cost] + value > dp[i]) {
-                dp[i] = dp[i - cost] + value;
-            }
-        }
-    }
-    for (int i = 1; i <= max_cost; ++i) {
-        dp[i] = max(dp[i], dp[i-1]);
-    }
-    return dp;
-}
-
-int main() {
+int main(){
     ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    
-    int n;
-    cin >> n;
-    
-    int m1, m2, m3;
-    cin >> m1 >> m2 >> m3;
-    
-    vector<pair<int, int>> upgrades_s(m1), upgrades_p(m2), upgrades_l(m3);
-    for (int i = 0; i < m1; i++){
-        cin >> upgrades_s[i].first >> upgrades_s[i].second;
-    }
-    for (int i = 0; i < m2; i++){
-        cin >> upgrades_p[i].first >> upgrades_p[i].second;
-    }
-    for (int i = 0; i < m3; i++){
-        cin >> upgrades_l[i].first >> upgrades_l[i].second;
-    }
-    
-    auto s_dp = compute_dp(upgrades_s, n);
-    auto p_dp = compute_dp(upgrades_p, n);
-    auto l_dp = compute_dp(upgrades_l, n);
-    
-    int ans = 0;
-    for (int c1 = 0; c1 <= n; ++c1) {
-        for (int c2 = 0; c2 <= n - c1; ++c2) {
-            int remaining = n - c1 - c2;
-            if (remaining < 0) continue;
-            ans = max(ans, s_dp[c1] * p_dp[c2] * l_dp[remaining]);
+    cin.tie(NULL);
+
+    int N, m1, m2, m3; cin >> N >> m1 >> m2 >> m3;
+    vector<int> dp1(N+1, 0);
+    for(int i = 0; i < m1; i++){
+        int c, v; cin >> c >> v;
+        for(int b = N; b >= c; b--){
+            if(dp1[b - c] + v > dp1[b]) dp1[b] = dp1[b - c] + v;
         }
     }
-    cout << ans << "\n";
+
+    vector<int> dp2(N+1, 0);
+    for(int i = 0; i < m2; i++){
+        int c, v; cin >> c >> v;
+        for(int b = N; b >= c; b--){
+            if(dp2[b - c] + v > dp2[b]) dp2[b] = dp2[b - c] + v;
+        }
+    }
+
+    vector<int> dp3(N+1, 0);
+    for(int i = 0; i < m3; i++){
+        int c, v; cin >> c >> v;
+        for(int b = N; b >= c; b--){
+            if(dp3[b - c] + v > dp3[b]) dp3[b] = dp3[b - c] + v;
+        }
+    }
+
+    vector<int> best3(N+1, 0);
+    best3[0] = dp3[0];
+    for(int c = 1; c <= N; c++){
+        best3[c] = best3[c - 1] > dp3[c] ? best3[c - 1] : dp3[c];
+    }
+
+    ll answer = 0;
+    for(int c1 = 0; c1 <= N; c1++){
+        if(dp1[c1] == 0) continue;
+        for(int c2 = 0; c2 + c1 <= N; c2++){
+            if(dp2[c2] == 0) continue;
+            int rem = N - c1 - c2;
+            int s = dp1[c1], p = dp2[c2], l = best3[rem];
+            if(l == 0) continue;
+            ll prod = (ll)s * p * l;
+            if(prod > answer) answer = prod;
+        }
+    }
+
+    cout << answer << endl;
     return 0;
 }
 
